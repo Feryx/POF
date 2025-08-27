@@ -1,0 +1,432 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: black;
+    color: white;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+#background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    background-color: black;
+    /*background: url("https://picsum.photos/1920/1080?random=1") center/cover no-repeat;*/
+    background: url("loading.jpg") center/cover no-repeat;
+    background-size: cover;
+    z-index: -1;
+    transition: filter 1.5s ease-in-out;
+}
+
+#content {
+    width: 100%;
+    max-width: 1600px;
+    height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+}
+
+.slide-mode {
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 15px;
+    /*box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);*/
+    transition: opacity 0.5s ease-in-out;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+}
+
+.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+h1 {
+    font-size: 4em;
+    margin: 0.3em 0;
+    color: #ff9900;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+h2 {
+    font-size: 2.5em;
+    margin: 0.2em 0;
+}
+
+p {
+    font-size: 1.4em;
+    line-height: 1.6;
+}
+
+.prod-number {
+    font-size: 2em;
+    font-weight: bold;
+    color: #ccc;
+    margin-bottom: 10px;
+}
+
+/* 3D Slider Styles */
+.slider-container {
+    perspective: 1200px;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.slider {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+}
+
+.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 40px;
+    background: rgba(0, 0, 0, 0.2);
+    /*i know you look for theese.. :D*/
+    border-radius: 10px;
+    backface-visibility: hidden;
+    transition: transform 1s ease, opacity 1s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.slide.active {
+    transform: rotateY(0deg);
+    opacity: 1;
+    z-index: 2;
+}
+
+.slide.prev {
+    transform: rotateY(90deg) translateX(-100%);
+    opacity: 0;
+    z-index: 1;
+}
+
+.slide.next {
+    transform: rotateY(-90deg) translateX(100%);
+    opacity: 0;
+    z-index: 1;
+}
+
+/* Gallery-specific slide styling to show images */
+.gallery-slide {
+    padding: 0;
+    background: transparent;
+}
+
+.gallery-slide img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+/* Gallery Styles */
+#gallery {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 99;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease-in-out;
+}
+
+#gallery.hidden {
+    display: none;
+    opacity: 0;
+}
+
+/* Overlay for Compo Countdown */
+#info-overlay {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    backdrop-filter: blur(5px);
+    display: none;
+    flex-direction: column;
+    align-items: flex-end;
+    color: white;
+    font-size: 1.2em;
+}
+
+#info-overlay.visible {
+    display: flex;
+}
+
+#compo-name-overlay {
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 0.8em;
+}
+
+#compo-timer-overlay {
+    font-size: 1.5em;
+    text-align: center;
+}
+
+/* PRIZEGIVING SPECIFIC STYLES */
+#prizegiving {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+#prizegiving .main-title {
+    width: 100%;
+    text-align: center;
+    margin-top: 5vh;
+    margin-bottom: 2vh;
+}
+
+#results-list {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.result-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 70px;
+    font-size: 1.8em;
+    transform: translateY(-100vh);
+    transition: transform 0.8s ease-out;
+    margin-top: 10px;
+}
+
+.result-item.active {
+    transform: translateY(0);
+}
+
+.result-item .place {
+    font-weight: bold;
+    width: 50px;
+    text-align: right;
+    margin-right: 15px;
+}
+
+.points-bar-container {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.points-bar-fill {
+    position: absolute;
+    /* Add this */
+    top: 0;
+    /* Add this */
+    left: 0;
+    /* Add this */
+    height: 100%;
+    background-color: #00aaff;
+    width: 0;
+    transition: width 1s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.points-text {
+    position: relative;
+    /* Change from absolute to relative to ensure it's in the document flow */
+    z-index: 2;
+    /* Increased z-index */
+    left: auto;
+    /* Reset positioning */
+    right: auto;
+    /* Reset positioning */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    /* Make sure it spans the whole container */
+    padding: 0 10px;
+    /* Add padding for better spacing */
+    box-sizing: border-box;
+    /* Include padding in the width */
+    white-space: nowrap;
+}
+
+.points-text span {
+    /* Optional: Add some styling to the spans */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* 🥇 Gold */
+.first-place .points-bar-fill {
+    background-image: linear-gradient(90deg, #d19e11, #ffd500, #d19e11);
+    background-size: 300% 100%;
+    animation: shineGold 6s linear infinite alternate;
+}
+
+@keyframes shineGold {
+    0% {
+        background-position: 0% 0%;
+    }
+
+    100% {
+        background-position: 100% 0%;
+    }
+}
+
+/* 🥈 Silver */
+.second-place .points-bar-fill {
+    background-image: linear-gradient(90deg, #a9a9a9, #ffffff, #c0c0c0, #a9a9a9);
+    background-size: 300% 100%;
+    animation: shineSilver 6s linear infinite alternate;
+}
+
+@keyframes shineSilver {
+    0% {
+        background-position: 0% 0%;
+    }
+
+    100% {
+        background-position: 100% 0%;
+    }
+}
+
+/* 🥉 Bronze */
+.third-place .points-bar-fill {
+    background-image: linear-gradient(90deg, #8b4513, #cd7f32, #ffa070, #cd7f32, #8b4513);
+    background-size: 300% 100%;
+    animation: shineBronze 6s linear infinite alternate;
+}
+
+@keyframes shineBronze {
+    0% {
+        background-position: 0% 0%;
+    }
+
+    100% {
+        background-position: 100% 0%;
+    }
+}
+
+.prod-prew-image {
+    width: 299px;
+    /* or whatever size you need */
+    height: 299px;
+    /* or whatever size you need */
+    opacity: 1;
+}
+
+/* timeline bar */
+.timeline-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+    white-space: nowrap;
+    z-index: 9999;
+}
+
+#timeline-content {
+    display: inline-block;
+    padding-left: 100%;
+    /* starting position from the right edge */
+    animation: scroll-timeline 30s linear infinite;
+}
+
+.timeline-item {
+    display: inline-block;
+    margin-right: 50px;
+    color: rgba(255, 255, 255, 0.9);
+    /* semi-transparent white */
+    font-weight: bold;
+    font-family: sans-serif;
+    font-size: 20px;
+    padding-top: 5px;
+}
+
+@keyframes scroll-timeline {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+#video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -1;
+    /* so it's behind everything else */
+}
+
+#video-background video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    /* fills the screen */
+}
+
+#logo-image {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 999999;
+}

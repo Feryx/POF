@@ -1,0 +1,51 @@
+.feryx-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 10px 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    flex-wrap: wrap; /* for proper wrapping on mobile */
+}
+
+.feryx-img img {
+    width: 150px;
+    height: auto;
+    border-radius: 5px;
+}
+
+.feryx-info {
+    flex: 1;
+    min-width: 200px;
+}
+
+.stars {
+    font-size: 24px;
+    cursor: pointer;
+}
+.star {
+    opacity: 0.3;
+    transition: opacity 0.2s;
+}
+.star.active {
+    opacity: 1;
+    color: gold;
+}
+
+/* Mobile view (max 768px width) */
+@media (max-width: 768px) {
+    .feryx-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .feryx-img img {
+        width: 100%;
+        max-width: 250px; /* to prevent it from being too large */
+    }
+    .feryx-info {
+        width: 100%;
+    }
+}
