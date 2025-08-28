@@ -2,7 +2,7 @@
 /*
 Plugin Name: POF+ PartyOrganizer By Feryx
 Description: A wp plugin for managing Demoscene competitions and productions.
-Version: 0.01
+Version: 0.02
 Author: Feryx
 RequiresPlugins: woocommerce/woocommerce.php
 */
@@ -316,10 +316,12 @@ function feryx_enqueue_admin_scripts($hook) {
 add_action('admin_enqueue_scripts', 'feryx_enqueue_admin_scripts');
 
 add_action('wp_footer', function() {
-    echo '<p class="has-text-align-center">
+	$enable_footertext  = get_option('po_enable_footertext', 'no');
+	if($enable_footertext==='yes'){
+    echo '<p class="has-text-align-center feryx-footer-credit">
     This party system is made possible by Feryx <a href="https://partyorganizer.qbparty.hu" target="_blank">Party Organizer</a>
 </p>
-';
+	';}
 });
 
 add_action('wp_ajax_update_timeline_order', 'update_timeline_order');

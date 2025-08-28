@@ -8,6 +8,9 @@ function po_settings_page() {
         update_option('po_opening_ceremony', sanitize_text_field($_POST['po_opening_ceremony']));
         update_option('po_previewSize', sanitize_text_field($_POST['po_previewSize']));
 
+        // **Video Background enable**
+        $enable_footertext = isset($_POST['po_enable_footertext']) ? 'yes' : 'no';
+        update_option('po_enable_footertext', $enable_footertext);
         // Checkbox
         $enable_screenshots = isset($_POST['po_enable_screenshots']) ? 'yes' : 'no';
         update_option('po_enable_screenshots', $enable_screenshots);
@@ -57,8 +60,8 @@ function po_settings_page() {
     $slider_logo        = get_option('po_slider_logo', '');
     $enable_video_bg    = get_option('po_enable_video_bg', 'no');
     $video_bg_id        = get_option('po_video_bg', '');
-    $video_bg_url       = $video_bg_id ? wp_get_attachment_url($video_bg_id) : '';
-
+    $enable_video_bg    = get_option('po_enable_video_bg', 'no');
+    $enable_footertext  = get_option('po_enable_footertext', 'no');
     // Extra Party Network Settings
     $partynetwork       = get_option('po_partynetwork', '');
     $partywifissid      = get_option('po_partywifissid', '');
@@ -71,6 +74,15 @@ function po_settings_page() {
     echo '<h1>Basics Settings</h1>';
     echo '<form method="post">';
 
+    // Preview size
+    echo '<p><label><strong>Preview Size (300px):</strong></label><br>';
+    echo '<input type="number" name="po_previewSize" value="' . esc_attr($preview_Size) . '"></p>';   
+
+	echo '<p><label><strong>„Show attribution in footer: This party system is made possible by Feryx Party Organizer”:</strong></label><br>';
+        echo '<input type="checkbox" name="po_enable_footertext" value="no" ' . checked('yes', $enable_footertext, false) . '> Enable</p>';
+    // Preview size
+    echo '<p><label><strong>Preview Size (300px):</strong></label><br>';
+    echo '<input type="number" name="po_previewSize" value="' . esc_attr($preview_Size) . '"></p>';
     // Preview size
     echo '<p><label><strong>Preview Size (300px):</strong></label><br>';
     echo '<input type="number" name="po_previewSize" value="' . esc_attr($preview_Size) . '"></p>';

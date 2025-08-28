@@ -25,5 +25,18 @@ This software is intended for **demoscene events, parties, educational purposes,
 
 ---
 
+## About the Ticket System
+
+The Party Organizer plugin provides PDF ticket generation and validation features.  
+It is built on top of widely used open-source libraries:
+
+- [FPDF](https://www.fpdf.org/) – for generating PDF tickets  
+- [PHP QR Code](https://sourceforge.net/projects/phpqrcode/) – for embedding QR codes  
+- [Html5-QRCode](https://github.com/mebjas/html5-qrcode) – for client-side QR code scanning  
+
+These libraries are included and used under their respective licenses.
+
+---
+
 **Author:** Feryx  
 **Year:** 2025
