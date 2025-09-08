@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name: POF+ Online Ticket System
-Description: Ticket management system for WooCommerce with votekey generation, PDF tickets, and QR verification. Instant ticket delivery after payment.
-Version: 1.3
+Description: POF+ extra Ticket management system for WooCommerce with votekey generation, PDF tickets, and QR verification. Instant ticket delivery after payment.
+Version: 1.4
 Author: Feryx
 RequiresPlugins: woocommerce/woocommerce.php
 */
@@ -29,26 +29,69 @@ register_activation_hook(__FILE__, function() use ($wpdb, $table_name) {
     dbDelta($sql);
 });
 
-// ===== Create WooCommerce products on activation =====
+// ===== Create WooCommerce Ticket products on activation =====
 register_activation_hook(__FILE__, function() {
+    require_once( ABSPATH . 'wp-admin/includes/post.php' ); // <- FONTOS!
+
     $products = [
-        'Ticket' => 1000,
-        'Online Ticket' => 2000,
-        'Supporter Ticket' => 3000,
+        'Regular Ticket'   => ['sku'=>1000, 'type'=>'normal'],
+        'Supporter Ticket' => ['sku'=>3000, 'type'=>'normal'],
+        'Online Ticket'    => ['sku'=>2000, 'type'=>'online_vote'],
     ];
-    foreach ($products as $title => $sku) {
+
+    foreach ($products as $title => $data) {
         if (!post_exists($title)) {
             $post_id = wp_insert_post([
-                'post_title' => $title,
-                'post_type' => 'product',
+                'post_title'  => $title,
+                'post_type'   => 'product',
                 'post_status' => 'publish'
             ]);
-            update_post_meta($post_id, '_price', 10);
-            update_post_meta($post_id, '_sku', $sku);
+            update_post_meta($post_id, '_price', 0);
+            update_post_meta($post_id, '_sku', $data['sku']);
             wp_set_object_terms($post_id, 'simple', 'product_type');
+
+            // Ticket meta
+            update_post_meta($post_id, '_is_ticket', 'yes');
+            update_post_meta($post_id, '_ticket_type', $data['type']);
         }
     }
 });
+
+
+
+
+
+// Add checkbox + dropdown to product edit page
+add_action('woocommerce_product_options_general_product_data', function() {
+    // Checkbox: jegy-e
+    woocommerce_wp_checkbox([
+        'id' => '_is_ticket',
+        'label' => __('This is a ticket product', 'pof-ticket'),
+        'description' => __('Enable if this product should generate a ticket on purchase.', 'pof-ticket')
+    ]);
+
+    // Dropdown: jegytípus
+    woocommerce_wp_select([
+        'id' => '_ticket_type',
+        'label' => __('Ticket type', 'pof-ticket'),
+        'options' => [
+            '' => __('Select type', 'pof-ticket'),
+            'normal' => __('Normal Ticket', 'pof-ticket'),
+            'online_vote' => __('Online Vote Only', 'pof-ticket'),
+        ],
+        'description' => __('Select the type of this ticket.', 'pof-ticket')
+    ]);
+});
+
+// Save values
+add_action('woocommerce_admin_process_product_object', function($product) {
+    $is_ticket = isset($_POST['_is_ticket']) ? 'yes' : 'no';
+    $ticket_type = isset($_POST['_ticket_type']) ? sanitize_text_field($_POST['_ticket_type']) : '';
+
+    $product->update_meta_data('_is_ticket', $is_ticket);
+    $product->update_meta_data('_ticket_type', $ticket_type);
+});
+
 
 // ===== Create Admin role =====
 register_activation_hook(__FILE__, function(){
@@ -67,31 +110,37 @@ function feryx_send_tickets_on_payment($order_id) {
         $product_name = $item->get_name();
         $quantity = $item->get_quantity();
 
-        if (in_array($product_name, ['Online Ticket','Ticket','Supporter Ticket'])) {
-            for ($i=0; $i < $quantity; $i++) {
-                $votekey = wp_generate_password(10,false,false);
-                $salt = wp_generate_password(8,false,false);
+       $product = wc_get_product($item->get_product_id());
+	if ($product->get_meta('_is_ticket') === 'yes') {
+    $ticket_type = $product->get_meta('_ticket_type');
 
-                // --- INSERT --- online = 1
-                $wpdb->insert($table_name, [
-                    'votekey'=>$votekey,
-                    'used'=>0,
-                    'online'=>1,
-                    'token'=>$salt,
-                    'user_id'=>$order->get_user_id()
-                ]);
+    for ($i=0; $i < $quantity; $i++) {
+        $votekey = wp_generate_password(10,false,false);
+        $salt = wp_generate_password(8,false,false);
 
-                // PDF generation
-				if($product_name === 'Online Ticket') {$ticket_pdf = generate_ticket_pdf($votekey, $salt. "Online", $product_name);}//do not allow the entrace with online woting ticket
-				else{$ticket_pdf = generate_ticket_pdf($votekey, $salt, $product_name);}
-                if (!file_exists($ticket_pdf)) continue;
+        // Ha online vote only → hibás salt mentve az adatbázisba
+        $db_salt = ($ticket_type === 'online_vote') ? wp_generate_password(8,false,false) : $salt;
 
-                // Send email with custom sender
-                $subject = "Your $product_name Ticket";
-                $body = "Attached is your ticket PDF for $product_name.";
-                pof_ticket_send_mail($user_email, $subject, $body, [$ticket_pdf]);
-            }
-        }
+        $wpdb->insert($table_name, [
+            'votekey'=>$votekey,
+            'used'=>0,
+            'online'=>1,
+            'token'=>$db_salt,   // ez kerül az adatbázisba
+            'user_id'=>$order->get_user_id()
+        ]);
+
+        // PDF generálás – a "helyes" salt-ot kapja a user
+        $ticket_pdf = generate_ticket_pdf($votekey, $salt, $product->get_name());
+
+        if (!file_exists($ticket_pdf)) continue;
+
+        // Email küldés
+        $subject = "Your " . $product->get_name() . " Ticket";
+        $body = "Attached is your ticket PDF for " . $product->get_name() . ".";
+        pof_ticket_send_mail($user_email, $subject, $body, [$ticket_pdf]);
+    }
+}
+
     }
 }
 

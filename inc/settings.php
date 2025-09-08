@@ -61,7 +61,7 @@ function po_settings_page() {
     $enable_video_bg    = get_option('po_enable_video_bg', 'no');
     $video_bg_id        = get_option('po_video_bg', '');
     $enable_video_bg    = get_option('po_enable_video_bg', 'no');
-    $enable_footertext  = get_option('po_enable_footertext', 'no');
+    $enable_footertext  = get_option('po_enable_footertext', 'yes');
     // Extra Party Network Settings
     $partynetwork       = get_option('po_partynetwork', '');
     $partywifissid      = get_option('po_partywifissid', '');
@@ -79,7 +79,7 @@ function po_settings_page() {
     echo '<input type="number" name="po_previewSize" value="' . esc_attr($preview_Size) . '"></p>';   
 
 	echo '<p><label><strong>„Show attribution in footer: This party system is made possible by Feryx Party Organizer”:</strong></label><br>';
-        echo '<input type="checkbox" name="po_enable_footertext" value="no" ' . checked('yes', $enable_footertext, false) . '> Enable</p>';
+        echo '<input type="checkbox" name="po_enable_footertext" value="yes" ' . checked('yes', $enable_footertext, false) . '> Enable</p>';
     // Preview size
     echo '<p><label><strong>Preview Size (300px):</strong></label><br>';
     echo '<input type="number" name="po_previewSize" value="' . esc_attr($preview_Size) . '"></p>';
