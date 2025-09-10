@@ -2,7 +2,7 @@
 /*
 Plugin Name: POF+ Party Organizer By Feryx
 Description: A wp plugin for managing Demoscene competitions and productions.
-Version: 0.91
+Version: 0.92
 Author: Feryx
 RequiresPlugins: woocommerce/woocommerce.php
 Text Domain: party-organizer
@@ -320,7 +320,7 @@ add_action('wp_footer', function() {
 	$enable_footertext  = get_option('po_enable_footertext', 'no');
 	if($enable_footertext==='yes'){
     echo '<p class="has-text-align-center feryx-footer-credit">
-    This party system is made possible by Feryx <a href="https://partyorganizer.qbparty.hu" target="_blank">Party Organizer</a>
+    This party & ticket system is made possible by <a href="https://feryx.hu" target="_blank">Feryx </a><a href="https://github.com/Feryx/POF" target="_blank">Party Organizer+</a>
 </p>
 	';}
 });
@@ -717,20 +717,5 @@ add_action('admin_footer', function () {
             <p style="margin-top: 10px; font-style: italic;">Have a great party,<br><strong>Feryx</strong></p>
         </div>
         <?php
-    }
-});
-// --- Create "Timeline" page on plugin activation ---
-register_activation_hook(__FILE__, function() {
-    // Check if page already exists
-    $page = get_page_by_path('timeline');
-    if (!$page) {
-        $new_page = array(
-            'post_title'   => 'Timeline',
-            'post_name'    => 'timeline',
-            'post_content' => '[feryx_timelinevisitoors]', // rögtön a shortcode-ot tartalmazza
-            'post_status'  => 'publish',
-            'post_type'    => 'page'
-        );
-        wp_insert_post($new_page);
     }
 });

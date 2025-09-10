@@ -128,5 +128,5 @@ function feryx_vote_normal() {
 add_action('wp_enqueue_scripts', function() {
     wp_enqueue_script('feryx-vote', plugin_dir_url(__FILE__) . 'feryx-vote.js', ['jquery'], '1.0', true);
     wp_localize_script('feryx-vote', 'feryxVote', ['ajaxurl' => admin_url('admin-ajax.php')]);
-    wp_enqueue_style('feryx-vote-style', plugin_dir_url(__FILE__) . '../css/feryx-vote.css');
+    wp_enqueue_style('feryx-vote-style', plugin_dir_url(__FILE__) . '../css/feryx-livevote.css');
 });
