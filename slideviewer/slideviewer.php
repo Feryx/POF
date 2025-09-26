@@ -65,7 +65,7 @@ $video_url       = $video_bg_id ? wp_get_attachment_url($video_bg_id) : '';
             <h1>Results</h1>
             <h2 id="prizegiving-compo-name">Compo Name</h2>
         </div>
-		<div id="prizegiving-left-image"></div> <!-- bal oldali kép -->
+		<div id="prizegiving-left-image"></div> <!-- left side prewiev image -->
         <div id="results-list"></div>
     </div>
 </div>

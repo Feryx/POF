@@ -2,7 +2,7 @@
 /*
 Plugin Name: POF+ Party Organizer By Feryx
 Description: A wp plugin for managing Demoscene competitions and productions.
-Version: 0.94
+Version: 0.95
 Author: Feryx
 RequiresPlugins: woocommerce/woocommerce.php
 Text Domain: party-organizer
@@ -457,7 +457,7 @@ if ($mode == 4) {
 
     $ranking = $wpdb->get_results($sql, ARRAY_A);
 
-    // screenshot teljes URL létrehozása
+    // screenshot full url
     $upload_dir = wp_upload_dir();
     $base_url = $upload_dir['baseurl'] . '/prods_screens/';
     foreach ($ranking as &$r) {
@@ -619,10 +619,8 @@ add_action('wp_enqueue_scripts', function() {
 
 
 
-// Csak admin felületen fusson
+// Onjly admin
 if ( is_admin() ) {
-
-    // Hozzáadjuk az admin menüpontot
     add_action('admin_menu', function() {
         add_menu_page(
             'Demo Data Manager',
@@ -653,7 +651,7 @@ if ( is_admin() ) {
         <?php
     }
 
-    // Űrlap feldolgozása
+    // Form process
     add_action('admin_init', function() {
         global $wpdb;
 
@@ -661,7 +659,7 @@ if ( is_admin() ) {
             $table = $wpdb->prefix . '_Feryx_compos';
 
             if ($_POST['demo_data_action'] === 'insert') {
-                // előbb töröljük a régi adatokat hogy ne duplázódjon
+                // first delete datas for not duplicate it.
                 $wpdb->query("TRUNCATE TABLE $table");
 
                 $wpdb->query("INSERT INTO $table (id, name, backscreen, start_time, online, live, upload, editing) VALUES

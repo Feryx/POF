@@ -1,7 +1,6 @@
 let compoTime;
 let eventTime;
 let lastModeBeforeGallery = -1;
-
 let compoTimerInterval, eventTimerInterval;
 let galleryInterval;
 let currentProd = 0, currentPrize = -1, currentGallery = 0;
@@ -11,7 +10,6 @@ let results = [];
 let maxPoints = 0;
 let currentMode = -1;
 let dataFromLastFetch = null;
-
 let overlayEvent = null;
 
 async function fetchSliderData() {
@@ -196,6 +194,21 @@ function updatePrizes() {
     resultItem.appendChild(pointsBarContainer);
     resultsList.prepend(resultItem);
 
+    // draw the prew img
+const imgDiv = document.getElementById("prizegiving-left-image");
+if (imgDiv) {
+    imgDiv.innerHTML = ""; 
+    if (newResult.screenshot) {
+        const img = document.createElement("img");
+        img.src = newResult.screenshot;
+        imgDiv.appendChild(img);
+        // fade-in anim
+        requestAnimationFrame(() => {
+            img.classList.add("visible");
+        });
+    }
+}
+
     setTimeout(() => {
         resultItem.classList.add("active");
         setTimeout(() => {
@@ -204,6 +217,7 @@ function updatePrizes() {
         }, 800);
     }, 10);
 }
+
 
 function createSlide(title, content) {
     const div = document.createElement("div");
@@ -259,7 +273,7 @@ document.addEventListener("keydown", async e => {
     if (e.code === "Space") {
         e.preventDefault();
         const newData = await fetchSliderData();
-        console.log("➡️ SPACE után:", newData); 
+        console.log("➡️ After SPACE:", newData); 
         showMode(newData);
     }
 
@@ -271,10 +285,31 @@ document.addEventListener("keydown", async e => {
 
     if (currentMode === 4) {
         if (e.code === "ArrowRight") { if (currentPrize < results.length - 1) { currentPrize++; updatePrizes(); } }
-        if (e.code === "ArrowLeft") {
-            const list = document.getElementById("results-list");
-            if (list.children.length > 0) { list.firstChild.remove(); currentPrize--; }
+if (e.code === "ArrowLeft") {
+    const list = document.getElementById("results-list");
+    if (list.children.length > 0) { 
+        list.firstChild.remove(); 
+        currentPrize--; 
+
+        const imgDiv = document.getElementById("prizegiving-left-image");
+if (imgDiv) {
+    imgDiv.innerHTML = "";
+    if (currentPrize >= 0 && currentPrize < results.length) {
+        const prevResult = results[currentPrize];
+        if (prevResult.screenshot) {
+            const img = document.createElement("img");
+            img.src = prevResult.screenshot;
+            imgDiv.appendChild(img);
+            // fade-in anim
+            requestAnimationFrame(() => {
+                img.classList.add("visible");
+            });
         }
+    }
+}
+
+    }
+}
     }
 
     if (currentMode === 5) {
