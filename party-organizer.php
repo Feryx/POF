@@ -2,7 +2,7 @@
 /*
 Plugin Name: POF+ Party Organizer By Feryx
 Description: A wp plugin for managing Demoscene competitions and productions.
-Version: 0.92
+Version: 0.94
 Author: Feryx
 RequiresPlugins: woocommerce/woocommerce.php
 Text Domain: party-organizer
@@ -369,7 +369,7 @@ add_action('wp_ajax_party_slider_mode', function() {
 add_action('wp_ajax_get_party_slider_mode', function() {
     global $wpdb;
 
-    // Default settings
+    // --- Default settings ---
     $mode               = get_option('party_slider_mode', -1);
     $announcement_text  = get_option('party_slider_announcement_text', 'nodataERR');
     $event_name         = get_option('party_slider_event_name', 'nodataERR');
@@ -377,29 +377,30 @@ add_action('wp_ajax_get_party_slider_mode', function() {
     $compo_id           = get_option('party_slider_compo_id', 'nodataERR');
     $prize_id           = get_option('party_slider_prizegiving_id', 'nodataERR');
     $enable_screenshots = get_option('po_enable_screenshots', 'yes');  
-	$party_network   = get_option('po_partynetwork', 'ERRs');
-    $party_wifi_ssid = get_option('po_partywifissid', 'ERRs');
-    $party_wifi_code = get_option('po_partywificode', 'ERRs');
-    $compo_time         = 'nodataERR';
-    $basic_bg           = get_option('po_slider_bg', ''); // default background
+    $basic_bg           = get_option('po_slider_bg', '');
+    $background_url     = $basic_bg;
 
-    $background_url = $basic_bg; // fallback
+    $compo_time = 'nodataERR';
+    $compos_table = $wpdb->prefix . '_Feryx_compos';
+    $prods_table  = $wpdb->prefix . '_Feryx_prods';
+    $votes_table  = $wpdb->prefix . '_Feryx_votes';
 
-    // If compo_id is set, get the compo time and backscreen image
+    // --- Compo datas get ---
     if ($compo_id !== 'nodataERR') {
-        $compos_table = $wpdb->prefix . '_Feryx_compos'; error_log('compo_id: ' . $compo_id);
-        $compo_data = $wpdb->get_row($wpdb->prepare("SELECT name, start_time, backscreen FROM $compos_table WHERE id = %d", intval($compo_id)));
+        $compo_data = $wpdb->get_row(
+            $wpdb->prepare("SELECT name, start_time, backscreen FROM $compos_table WHERE id = %d", intval($compo_id))
+        );
         if ($compo_data) {
             $compo_time = $compo_data->start_time;
-            // If mode is 3 or 4 and there is a backscreen
             if (in_array($mode, [3,4]) && !empty($compo_data->backscreen)) {
                 $attachment_url = wp_get_attachment_url($compo_data->backscreen);
                 if ($attachment_url) $background_url = $attachment_url;
             }
+            if ($mode == 1) $event_name = $compo_data->name; // countdown compo name
         }
     }
-    if ($mode == 1){$event_name=$compo_data->name; $compo_time ->start_time;}
-    // Get slider images from admin settings
+
+    // --- Slider images ---
     $slider_images = json_decode(get_option('po_slider_images', '[]'), true);
     if (!is_array($slider_images)) $slider_images = [];
 
@@ -410,66 +411,63 @@ add_action('wp_ajax_get_party_slider_mode', function() {
         'event_time'        => $event_time,
         'compo_id'          => $compo_id,
         'prize_id'          => $prize_id,
-		'party_network'   => $party_network,
-		'party_wifi_ssid' => $party_wifi_ssid,
-		'party_wifi_code' => $party_wifi_code,
         'compo_time'        => $compo_time,
         'enable_screenshots'=> $enable_screenshots,
-        'galleryImages'     => $slider_images, // gallery images go here
-        'background'        => $background_url, // background image goes here
+        'galleryImages'     => $slider_images,
+        'background'        => $background_url,
         'data'              => []
     ];
 
     if ($compo_id !== 'nodataERR') {
-        $prods_table = $wpdb->prefix . '_Feryx_prods';
-        $votes_table = $wpdb->prefix . '_Feryx_votes';
 
         // --- Mode 3: Compo display ---
         if ($mode == 3) {
-            $sql = $wpdb->prepare("
-                SELECT
-                    id,
-                    screenshot,
-                    product_title,
-                    author,
-                    comment_public,
-                    orderid
-                FROM $prods_table
-                WHERE compo_id = %d AND status = 1
-                ORDER BY orderid ASC
-            ", intval($compo_id));
-
-            $entries = $wpdb->get_results($sql, ARRAY_A);
-            $processed_entries = [];
+            $entries = $wpdb->get_results(
+                $wpdb->prepare("
+                    SELECT id, screenshot, product_title, author, comment_public, orderid
+                    FROM $prods_table
+                    WHERE compo_id = %d AND status = 1
+                    ORDER BY orderid ASC
+                ", intval($compo_id)), ARRAY_A
+            );
             $upload_dir = wp_upload_dir();
             $base_url = $upload_dir['baseurl'] . '/prods_screens/';
-
-            foreach ($entries as $entry) {
+            foreach ($entries as &$entry) {
                 $entry['screenshot'] = $base_url . $entry['screenshot'];
-                $processed_entries[] = $entry;
             }
-
-            $response['data'] = $processed_entries;
+            $response['data'] = $entries;
         }
 
         // --- Mode 4: Prizegiving ---
-        if ($mode == 4) {
-            $sql = $wpdb->prepare("
-                SELECT
-                    p.id,
-                    p.product_title,
-                    p.author,
-                    SUM(v.vote) as total_points
-                FROM $prods_table p
-                INNER JOIN $votes_table v ON p.id = v.entryid
-                WHERE p.compo_id = %d
-                GROUP BY p.id, p.product_title, p.author
-                ORDER BY total_points DESC
-            ", intval($compo_id));
+// --- Mode 4: Prizegiving ---
+if ($mode == 4) {
+    $sql = $wpdb->prepare("
+        SELECT
+            p.id,
+            p.product_title,
+            p.author,
+            p.screenshot,
+            SUM(v.vote) as total_points
+        FROM $prods_table p
+        LEFT JOIN $votes_table v ON p.id = v.entryid
+        WHERE p.compo_id = %d AND p.status = 1
+        GROUP BY p.id, p.product_title, p.author, p.screenshot
+        ORDER BY total_points DESC
+    ", intval($compo_id));
 
-            $ranking = $wpdb->get_results($sql, ARRAY_A);
-            $response['data'] = $ranking;
-        }
+    $ranking = $wpdb->get_results($sql, ARRAY_A);
+
+    // screenshot teljes URL létrehozása
+    $upload_dir = wp_upload_dir();
+    $base_url = $upload_dir['baseurl'] . '/prods_screens/';
+    foreach ($ranking as &$r) {
+        $r['screenshot'] = $base_url . $r['screenshot'];
+    }
+
+    $response['data'] = $ranking;
+}
+
+
 
         // --- Timeline ---
         $timeline_table = $wpdb->prefix . '_Feryx_timeline';
@@ -480,19 +478,18 @@ add_action('wp_ajax_get_party_slider_mode', function() {
 
         $timeline_formatted = [];
         foreach ($timeline_items as $item) {
-            $time_formatted = date('D H:i', strtotime($item['time'])); // e.g., "Fri 15:00"
             $timeline_formatted[] = [
                 'eventname' => $item['eventname'],
-                'time'      => $time_formatted,
+                'time'      => date('D H:i', strtotime($item['time'])),
                 'list_id'   => $item['list_id']
             ];
         }
-
         $response['timeline'] = $timeline_formatted;
     }
 
     wp_send_json($response);
 });
+
 
 // Add button to Admin menu
 add_action('admin_menu', function() {

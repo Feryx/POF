@@ -48,15 +48,35 @@ if (empty($event_time)) {
                 update_option('party_slider_event_time', sanitize_text_field($_POST['event_time']));
                 break;
 
-            case 'compo_display':
-                update_option('party_slider_mode', 3);
-                update_option('party_slider_compo_id', intval($_POST['compo_id2']));
-                break;
+case 'compo_display':
+    update_option('party_slider_mode', 3);
+
+    $compo_id2 = intval($_POST['compo_id2']);
+    update_option('party_slider_compo_id', $compo_id2);
+
+    // A kiválasztott ID-hoz tartozó név lekérése
+    $row = $wpdb->get_row(
+        $wpdb->prepare("SELECT name FROM $table_name WHERE id = %d", $compo_id2)
+    );
+    if ($row) {
+        update_option('party_slider_event_name', sanitize_text_field($row->name));
+    }
+    break;
+
 
             case 'prizegiving':
-                update_option('party_slider_mode', 4);
-                update_option('party_slider_prizegiving_id', intval($_POST['prize_id']));
-                break;
+    update_option('party_slider_mode', 4);
+    $prize_id = intval($_POST['prize_id']);
+    update_option('party_slider_prizegiving_id', $prize_id);
+
+    // A kiválasztott ID-hoz tartozó név lekérése
+    $row = $wpdb->get_row(
+        $wpdb->prepare("SELECT name FROM $table_name WHERE id = %d", $prize_id)
+    );
+    if ($row) {
+        update_option('party_slider_event_name', sanitize_text_field($row->name));
+    }
+    break;
         }
 
         echo '<div class="updated"><p>Settings saved!</p></div>';
